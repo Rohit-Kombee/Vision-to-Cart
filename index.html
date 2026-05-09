@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vision to Cart Matcher</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --panel: #111827;
+        --text: #e5e7eb;
+        --muted: #94a3b8;
+        --accent: #38bdf8;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: radial-gradient(circle at 10% 10%, #1e293b 0, var(--bg) 45%);
+        color: var(--text);
+      }
+      .wrap {
+        max-width: 760px;
+        margin: 40px auto;
+        padding: 24px;
+      }
+      .card {
+        background: linear-gradient(180deg, #111827, #0b1220);
+        border: 1px solid #1f2937;
+        border-radius: 14px;
+        padding: 24px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+      }
+      p {
+        color: var(--muted);
+        margin-top: 0;
+      }
+      input[type="file"] {
+        display: block;
+        width: 100%;
+        margin: 14px 0;
+        color: var(--text);
+      }
+      button {
+        background: var(--accent);
+        color: #042f4b;
+        font-weight: bold;
+        border: 0;
+        border-radius: 8px;
+        padding: 10px 16px;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .result {
+        margin-top: 16px;
+        padding: 14px;
+        border: 1px solid #334155;
+        border-radius: 10px;
+        background: #0b1324;
+        min-height: 56px;
+      }
+      .ok {
+        color: #22c55e;
+      }
+      .error {
+        color: #f87171;
+      }
+      a {
+        color: #7dd3fc;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <h1>Vision Product Matcher</h1>
+        <p>Upload a product image to get one matching URL from your Magrabi catalog.</p>
+        <form id="match-form">
+          <input id="image-input" type="file" accept="image/*" required />
+          <button id="submit-btn" type="submit">Analyze & Match</button>
+        </form>
+        <div id="result" class="result">Waiting for upload...</div>
+      </div>
+    </div>
+
+    <script>
+      const form = document.getElementById("match-form");
+      const imageInput = document.getElementById("image-input");
+      const submitBtn = document.getElementById("submit-btn");
+      const result = document.getElementById("result");
+
+      function setResult(text, kind) {
+        result.className = "result " + (kind || "");
+        result.innerHTML = text;
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const file = imageInput.files?.[0];
+        if (!file) {
+          setResult("Please select an image first.", "error");
+          return;
+        }
+
+        submitBtn.disabled = true;
+        setResult("Analyzing image and searching your catalog...", "");
+
+        const formData = new FormData();
+        formData.append("image", file);
+
+        try {
+          const res = await fetch("/api/match", {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await res.json();
+          if (!res.ok) {
+            setResult("Error: " + (data.detail || "Request failed"), "error");
+            return;
+          }
+
+          if (data.ok && data.product_url) {
+            setResult(
+              `This is the URL for your matching product: <a href="${data.product_url}" target="_blank" rel="noopener">${data.product_url}</a>`,
+              "ok"
+            );
+          } else {
+            setResult(data.message || "No matching product found.", "error");
+          }
+        } catch (err) {
+          setResult("Request failed: " + err.message, "error");
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>
