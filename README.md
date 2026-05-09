@@ -1,131 +1,323 @@
-# Vision-to-Product URL (Hackathon Prototype)
+# Vision-to-Product URL Matching  
+### AI-Powered Commerce Intelligence Prototype
 
-This project is the working prototype for the **Vision-to-Cart / MCP Commerce Intelligence** idea.
+An AI-driven prototype built for the **Vision-to-Cart / MCP Commerce Intelligence Challenge**.
 
-Current approach:
+This project demonstrates how a user-uploaded product image can be transformed into a direct product match from the commerce database using AI-powered attribute extraction and backend variant matching.
 
-1. User uploads a product image in a lightweight FastAPI UI.
-2. AI extracts product attributes from the image (for example product type).
-3. FastAPI calls Magrabi ecom endpoint: `/api/variant-match/`.
-4. Ecom service returns a matching variant with URL from DB (`product_productvariant.url`).
-5. Frontend prints: `This is the URL for your matching product: ...`
+The prototype combines:
 
----
-
-## Why this prototype exists
-
-For hackathon speed, AI extraction is built as a **separate FastAPI app**.
-
-Target production direction:
-
-- Move this logic into a **new app/module inside `magrabi-ecom-services`**
-- Keep matching and channel logic in Saleor backend
-- On storefront side, use this result to trigger the required cart mutation flow
+- Image understanding
+- AI-based attribute extraction
+- Variant matching
+- Commerce backend integration
+- Direct product URL retrieval
+- Future-ready cart integration flow
 
 ---
 
-## Architecture
+# Overview
+
+The application allows a user to upload a product image through a lightweight FastAPI interface.
+
+The system then:
+
+1. Extracts visual product attributes using AI.
+2. Sends extracted attributes to the commerce backend.
+3. Matches the closest product variant from the database.
+4. Returns the product URL stored in the backend (`product_productvariant.url`).
+5. Displays the matched product URL to the user.
+
+This prototype is designed as the first step toward a fully automated **Vision-to-Cart** commerce experience.
+
+---
+
+# Core Idea
+
+The returned product URL (or SKU extracted from the matched variant) can be used to trigger downstream commerce actions such as:
+
+- Add-to-cart mutations
+- Storefront cart APIs
+- Wishlist creation
+- Personalized recommendations
+- Smart shopping assistants
+
+Future flow:
 
 ```text
-[Image Upload UI]
-      |
-      v
-[FastAPI Matcher]
-  - AI attribute extraction
-  - auth token handling
-      |
-      v
-[magrabi-ecom-services]
-  POST /api/variant-match/
-  - match variant by attributes/channel
-  - return DB variant URL + metadata
+Image → AI Attribute Extraction → Variant Match → SKU/URL → Cart Mutation
+```
+
+This creates a seamless AI-assisted shopping experience where users can visually search products and directly add them to their cart.
+
+---
+
+# Architecture
+
+```text
+                    ┌──────────────────────┐
+                    │  Image Upload UI    │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │   FastAPI Matcher    │
+                    │----------------------│
+                    │ • AI attribute scan  │
+                    │ • Auth token logic   │
+                    │ • Request handling   │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+               ┌────────────────────────────────┐
+               │  magrabi-ecom-services         │
+               │--------------------------------│
+               │ POST /api/variant-match/       │
+               │                                │
+               │ • Variant attribute matching   │
+               │ • Channel-aware filtering      │
+               │ • DB-backed URL retrieval      │
+               │ • Matching fallback strategy   │
+               └────────────────────────────────┘
 ```
 
 ---
 
-## Run locally
+# Important Note About the Codebase
 
-### 1) Start Magrabi ecom services
+This repository contains the **FastAPI prototype layer** and lightweight integration logic only.
 
-From `magrabi-ecom-services`:
+A significant portion of the business logic and commerce functionality exists inside the separate backend service:
+
+- `magrabi-ecom-services`
+
+That backend contains:
+
+- Variant matching implementation
+- Product models
+- Channel-aware logic
+- Commerce APIs
+- Database-backed URL retrieval
+- Internal matching strategies
+
+Therefore, this repository should be considered a **working prototype/demo implementation** rather than the complete production-ready system.
+
+---
+
+# Features
+
+- AI-powered product attribute extraction
+- Lightweight FastAPI frontend
+- Integration with Magrabi commerce backend
+- Channel-aware variant matching
+- Direct DB-backed product URL retrieval
+- Flexible authentication support
+- Fallback matching strategy
+- Extensible architecture for cart/storefront integration
+
+---
+
+# Technology Stack
+
+- Python
+- FastAPI
+- AI Vision Models (CLIP/OpenAI Vision)
+- Saleor-based Commerce Backend
+- Docker
+- PostgreSQL
+- REST APIs
+
+---
+
+# Project Flow
+
+```text
+User uploads image
+        │
+        ▼
+AI extracts product attributes
+        │
+        ▼
+FastAPI sends attributes to:
+POST /api/variant-match/
+        │
+        ▼
+Commerce backend finds closest variant
+        │
+        ▼
+Backend returns:
+- Product URL
+- SKU
+- Variant metadata
+        │
+        ▼
+Frontend displays matching product
+```
+
+---
+
+# Local Development Setup
+
+## 1) Start Magrabi Ecom Services
+
+From the `magrabi-ecom-services` repository:
 
 ```bash
 docker compose -f docker-compose-dev.yml up -d
 ```
 
-Ensure backend is reachable at `http://localhost:8000`.
+Ensure backend is accessible at:
 
-### 2) Start this FastAPI app
+```text
+http://localhost:8000
+```
+
+---
+
+## 2) Start the FastAPI Prototype
 
 ```bash
 cd product-image-matcher
+
 python -m venv .venv
+
+# Windows
 .venv\Scripts\activate
+
 pip install -r requirements.txt
+
 copy .env.example .env
+
 uvicorn app:app --reload --port 5050
 ```
 
-Open: `http://127.0.0.1:5050`
+Open in browser:
 
----
-
-## Environment configuration (`.env`)
-
-- `ECOM_ATTRIBUTE_MATCH_URL`  
-  Example: `http://localhost:8000/api/variant-match/`
-
-- Auth options (first available is used):
-  - `ECOM_API_TOKEN`
-  - `SALEOR_API_TOKEN`
-  - `SALEOR_USER_EMAIL` + `SALEOR_USER_PASSWORD` (auto token generation using `tokenCreate`)
-
-- `SALEOR_GRAPHQL_URL`  
-  Used when generating token from user credentials.
-
-- `SALEOR_CHANNEL_SLUG`  
-  Example: `magrabi-sa-web`
-
-- AI extraction:
-  - `LOCAL_VISION_MODEL` (default: `openai/clip-vit-base-patch32`)
-  - Optional fallback: `OPENAI_API_KEY` + `USE_OPENAI_VISION=true`
-
----
-
-## Current status
-
-- Attribute extraction is AI-driven.
-- Variant URL is fetched from Magrabi DB-backed model (`ProductVariant.url`).
-- Endpoint supports channel-aware matching and fallback matching strategy.
-
----
-
-## Demo video
-
-Add your video file and link it here.
-
-Recommended:
-
-1. Create folder: `docs/`
-2. Put video file: `docs/demo.mp4`
-3. Keep this section in README:
-
-```md
-## Demo video
-
-[Watch demo video](docs/demo.mp4)
-```
-
-If you upload to Drive/YouTube, replace with public URL:
-
-```md
-## Demo video
-
-[Watch demo video](https://your-video-link)
+```text
+http://127.0.0.1:5050
 ```
 
 ---
 
-## Next step (post-hackathon)
+# Environment Variables
 
-Refactor this FastAPI prototype into a native app inside `magrabi-ecom-services` so the full flow (AI extraction -> variant match -> storefront/cart mutation) runs under one backend domain.
+## Commerce Backend
+
+| Variable | Description |
+|---|---|
+| `ECOM_ATTRIBUTE_MATCH_URL` | Variant matching API endpoint |
+| `SALEOR_GRAPHQL_URL` | Saleor GraphQL endpoint |
+| `SALEOR_CHANNEL_SLUG` | Commerce channel slug |
+
+Example:
+
+```env
+ECOM_ATTRIBUTE_MATCH_URL=http://localhost:8000/api/variant-match/
+SALEOR_GRAPHQL_URL=http://localhost:8000/graphql/
+SALEOR_CHANNEL_SLUG=magrabi-sa-web
+```
+
+---
+
+## Authentication Options
+
+The first available authentication method is used:
+
+### Option 1 — Static API Token
+
+```env
+ECOM_API_TOKEN=your_token
+```
+
+or
+
+```env
+SALEOR_API_TOKEN=your_token
+```
+
+### Option 2 — Auto Token Generation
+
+```env
+SALEOR_USER_EMAIL=user@example.com
+SALEOR_USER_PASSWORD=your_password
+```
+
+Uses Saleor `tokenCreate` mutation internally.
+
+---
+
+## AI Extraction Configuration
+
+| Variable | Description |
+|---|---|
+| `LOCAL_VISION_MODEL` | Local AI model |
+| `USE_OPENAI_VISION` | Enable OpenAI Vision fallback |
+| `OPENAI_API_KEY` | OpenAI API key |
+
+Example:
+
+```env
+LOCAL_VISION_MODEL=openai/clip-vit-base-patch32
+USE_OPENAI_VISION=true
+OPENAI_API_KEY=your_key
+```
+
+---
+
+# Current Prototype Status
+
+Implemented:
+
+- AI-driven attribute extraction
+- Backend variant matching
+- Database-backed product URL retrieval
+- Channel-aware filtering
+- Lightweight FastAPI UI
+- Authentication handling
+- Matching fallback strategy
+
+Planned / Future Scope:
+
+- Native integration inside `magrabi-ecom-services`
+- Storefront cart mutation support
+- SKU-based add-to-cart automation
+- Personalized recommendation engine
+- Improved AI visual matching
+- Multi-image support
+- Production-grade optimization
+
+---
+
+# Demo Video
+
+Watch the prototype demo here:
+
+[Demo Video](https://softwareitconsulting-my.sharepoint.com/:v:/g/personal/rohit_sahu_forchunex_com/IQA3do9CO48QTp3txh8KJcFLAUQSg8fcdr2wkqCqBfBRs9E?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=OXdCUj)
+
+---
+
+# Future Direction
+
+The long-term goal is to move the entire flow into a unified commerce backend:
+
+```text
+AI Extraction
+      ↓
+Variant Matching
+      ↓
+Storefront Mutation
+      ↓
+Cart Creation
+      ↓
+Checkout Experience
+```
+
+This would allow users to discover and purchase products directly from images with minimal friction.
+
+---
+
+# Disclaimer
+
+This project is a hackathon prototype created to demonstrate the concept and technical feasibility of AI-powered visual commerce matching.
+
+The implementation is intentionally lightweight and focuses on validating the architecture and user flow rather than delivering a fully production-ready system.
