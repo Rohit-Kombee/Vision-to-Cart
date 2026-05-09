@@ -97,9 +97,8 @@ Planned:
 
 # Demo Video
 
-<video controls width="100%">
-  <source src="09.05.2026_14.33.09_REC.mp4" type="video/mp4">
-</video>
+https://raw.githubusercontent.com/Rohit-Kombee/Vision-to-Cart/main/09.05.2026_14.33.09_REC.mp4
+
 ---
 
 # Future Direction
