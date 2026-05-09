@@ -15,9 +15,11 @@ This project demonstrates how a user-uploaded product image can be converted int
 1. User uploads a product image.
 2. AI extracts product attributes from the image.
 3. FastAPI sends extracted attributes to:
-   ```text
-   POST /api/variant-match/
-   ```
+
+```text
+POST /api/variant-match/
+```
+
 4. `magrabi-ecom-services` matches the closest product variant.
 5. Backend returns:
    - Product URL
@@ -78,7 +80,7 @@ Image → AI Match → Variant URL/SKU → Cart Mutation
 
 # Current Status
 
-Implemented:
+### Implemented
 
 - AI attribute extraction
 - Variant matching API integration
@@ -86,7 +88,7 @@ Implemented:
 - Lightweight FastAPI interface
 - Channel-aware matching
 
-Planned:
+### Planned
 
 - Native integration into `magrabi-ecom-services`
 - Direct cart/storefront mutation
@@ -97,7 +99,13 @@ Planned:
 
 # Demo Video
 
-https://raw.githubusercontent.com/Rohit-Kombee/Vision-to-Cart/main/09.05.2026_14.33.09_REC.mp4
+<video autoplay muted controls loop width="100%">
+  <source src="https://raw.githubusercontent.com/Rohit-Kombee/Vision-to-Cart/main/09.05.2026_14.33.09_REC.mp4" type="video/mp4">
+</video>
+
+If the embedded player does not render on your GitHub view:
+
+[▶ Watch Demo Video](https://raw.githubusercontent.com/Rohit-Kombee/Vision-to-Cart/main/09.05.2026_14.33.09_REC.mp4)
 
 ---
 
