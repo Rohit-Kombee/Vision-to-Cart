@@ -97,14 +97,9 @@ Planned:
 
 # Demo Video
 
-<video width="100%" controls>
-  <source src="https://softwareitconsulting-my.sharepoint.com/:v:/g/personal/rohit_sahu_forchunex_com/IQA3do9CO48QTp3txh8KJcFLAUQSg8fcdr2wkqCqBfBRs9E?download=1" type="video/mp4">
+<video controls width="100%">
+  <source src="09.05.2026_14.33.09_REC.mp4" type="video/mp4">
 </video>
-
-If video preview is not supported:
-
-[Watch Demo Video](https://softwareitconsulting-my.sharepoint.com/:v:/g/personal/rohit_sahu_forchunex_com/IQA3do9CO48QTp3txh8KJcFLAUQSg8fcdr2wkqCqBfBRs9E?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=OXdCUj)
-
 ---
 
 # Future Direction
